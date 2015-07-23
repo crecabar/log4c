@@ -7,6 +7,7 @@ UNAME_M = $(shell uname -m)
 ifeq ($(UNAME_S), Linux)
     LIB_EX=so
     LD_OPTIONS=-shared
+    CXX_OPTIONS=-fPIC
 endif
 
 ifeq ($(UNAME_S), Darwin)
@@ -40,7 +41,7 @@ MD	=   mkdir -p
 
 # Flags
 CFLAGS	=   -Wall -O3 -c
-CXXFLAGS=   -Wall -g -ansi -I$(INCLUDE)
+CXXFLAGS=   -Wall -g -ansi -I$(INCLUDE) $(CXX_OPTIONS)
 LDFLAGS	=   -L$(LIB) -llogger
 
 # Build all the binaries, libraries and executables
@@ -71,8 +72,8 @@ $(OBJ)/%.o : $(SRC)/%.cpp
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 test:
-	$(CXX) -o testD.exe test.cpp $(CXXFLAGS) $(LDFLAGS)
-	$(CXX) -o testS.exe test.cpp $(CXXFLAGS) $(LDFLAGS) -Bstatic
+	$(CXX) -o testD test.cpp $(CXXFLAGS) $(LDFLAGS)
+	$(CXX) -o testS test.cpp $(CXXFLAGS) $(LDFLAGS) -Bstatic
 
 # **************** Clean **********************
 .PHONY: clean_objects
@@ -81,7 +82,7 @@ clean:
 	@echo Cleaning all objects...
 	$(RM) $(OBJS)
 	$(RM) $(LIB)
-	$(RM) testD.* testS.*
+	$(RM) testD* testS*
 
 clean_objects:
 	$(RM) $(OBJ)/*
