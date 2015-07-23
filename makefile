@@ -1,5 +1,20 @@
-# makefile to build IAM Library
+# makefile to build Logger Library
 
+# Get the current environment
+UNAME_S = $(shell uname -s)
+UNAME_M = $(shell uname -m)
+
+ifeq ($(UNAME_S), Linux)
+    LIB_EX=so
+    LD_OPTIONS=-shared
+endif
+
+ifeq ($(UNAME_S), Darwin)
+    LIB_EX=dylib
+    LD_OPTIONS=-dynamiclib -arch $(UNAME_M)
+endif
+
+# Directories
 BIN	=   bin
 SRC	=   src
 LIB	=   lib
@@ -8,24 +23,27 @@ OBJ	=   obj
 SOURCES	=   $(wildcard $(SRC)/*.cpp)
 OBJS	=   $(addprefix $(OBJ)/, $(notdir $(SOURCES:.cpp=.o)))
 
-LOGGER_LIB_SHARED = liblogger.dylib
+# Targets
+LOGGER_LIB_SHARED = liblogger.$(LIB_EX)
 LOGGER_LIB_STATIC = liblogger.a
 
+# Commands
 CD	=   cd
 CC	=   gcc
 CXX	=   g++
 AR	=   ar -rv
-LD	=   g++ -dynamiclib -arch x86_64
+LD	=   g++ $(LD_OPTIONS)
 MV	=   mv
-RM	=   rm
+RM	=   rm -rf
 MAKE	=   make
 MD	=   mkdir -p
 
+# Flags
 CFLAGS	=   -Wall -O3 -c
-CPPFLAGS=   -Wall -g -ansi -I$(INCLUDE)
-#LDFLAGS	=   -L$(LIB) -liam
+CXXFLAGS=   -Wall -g -ansi -I$(INCLUDE)
+LDFLAGS	=   -L$(LIB) -llogger
 
-#
+# Build all the binaries, libraries and executables
 all : dirs $(LOGGER_LIB_STATIC) $(LOGGER_LIB_SHARED) test
 
 dirs :
@@ -50,10 +68,11 @@ $(OBJ)/%.o : $(SRC)/%.c
 
 $(OBJ)/%.o : $(SRC)/%.cpp
 	@echo Creating $@ with $^
-	$(CXX) -c $(CPPFLAGS) $< -o $@
+	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 test:
-	$(CXX) -o test test.cpp -Iinclude -Llib -llogger
+	$(CXX) -o testD.exe test.cpp $(CXXFLAGS) $(LDFLAGS)
+	$(CXX) -o testS.exe test.cpp $(CXXFLAGS) $(LDFLAGS) -Bstatic
 
 # **************** Clean **********************
 .PHONY: clean_objects
@@ -61,9 +80,8 @@ test:
 clean:
 	@echo Cleaning all objects...
 	$(RM) $(OBJS)
-	$(RM) $(LIB)/$(LOGGER_LIB_STATIC)
-	$(RM) $(LIB)/$(LOGGER_LIB_SHARED)
-	$(RM) test
+	$(RM) $(LIB)
+	$(RM) testD.* testS.*
 
 clean_objects:
 	$(RM) $(OBJ)/*

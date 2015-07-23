@@ -5,6 +5,8 @@
  * Created on May 15, 2015, 3:19 PM
  */
 
+#include <iostream>
+#include <cstring>
 #include <LoggerInterface.h>
 #include <LogLevel.h>
 #include <LogContext.h>
